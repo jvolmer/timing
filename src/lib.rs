@@ -1,18 +1,43 @@
-use serde_json::{Result, Value};
+use serde::{Deserialize, Serialize};
+use serde_json::Result;
+
+#[derive(Serialize, Deserialize)]
+pub struct HarvestProjectAssignments {
+    project_assignments: Vec<HarvestProject>,
+}
+#[derive(Serialize, Deserialize)]
+pub struct HarvestProject {
+    project: HarvestProjectIdentification,
+}
+#[derive(Serialize, Deserialize)]
+pub struct HarvestProjectIdentification {
+    id: u32,
+    name: String,
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Project {
-    id: String,
+    id: u32,
     name: String
 }
 
-impl Project {
-    pub fn from(string: &str) -> Result<Project> {
-	let json: Value = serde_json::from_str(string)?;
-	println!("{}", json["project_assignments"][0]["project"]["name"].as_str().unwrap());
-	Ok(Project {
-	    id: json["project_assignments"][0]["project"]["id"].to_string(),
-	    name: json["project_assignments"][0]["project"]["name"].as_str().unwrap().to_string()
+#[derive(Debug, PartialEq)]
+pub struct Projects {
+    projects: Vec<Project>,
+}
+    
+impl Projects {
+    pub fn from(string: &str) -> Result<Projects> {
+	let assignments: HarvestProjectAssignments = serde_json::from_str(string)?;
+	let projects: Vec<Project> = assignments.project_assignments
+	    .into_iter()
+	    .map(|project| Project {
+		id: project.project.id,
+		name: project.project.name
+	    })
+	    .collect();
+	Ok(Projects {
+	    projects: projects
 	})
     }
 }
@@ -23,17 +48,21 @@ mod tests {
 
     #[test]
     fn it_parses_json_into_object() {
-	let json = projects_json();
+	let json = String::from(HARVEST_PROJECTS);
 	assert_eq!(
-	    Project::from(&json).unwrap(),
-	    Project {
-		id: "95783638".to_string(),
-		name: "lise Buddy".to_string()
-	    });
+	    Projects::from(&json).unwrap(),
+	    Projects {
+		projects: vec![
+		    Project {
+			id: 95783638,
+			name: "lise Buddy".to_string()
+		    }
+		]
+	    }
+	);
     }
 
-    fn projects_json() -> String {
-	return String::from(r#"
+    const HARVEST_PROJECTS: &str = r#"
 {
   "project_assignments": [
     {
@@ -74,6 +103,6 @@ mod tests {
     }
   ]
 }
-"#)
-    }
+"#;
+//    }
 }
