@@ -1,19 +1,47 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct HarvestProjectAssignments {
     project_assignments: Vec<HarvestProject>,
 }
-#[derive(Serialize, Deserialize)]
+
+impl HarvestProjectAssignments {
+    pub fn from(string: &str) -> Result<HarvestProjectAssignments> {
+	serde_json::from_str(string)
+    }
+
+    pub fn to_projects(self) -> Result<Projects> {
+	let projects: Vec<Project> = self.project_assignments
+	    .into_iter()
+	    .map(|harvest_project| harvest_project.to_project())
+	    .collect();
+	Ok(Projects {
+	    projects: projects
+	})
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct HarvestProject {
     project: HarvestProjectIdentification,
 }
-#[derive(Serialize, Deserialize)]
+
+impl HarvestProject {
+    pub fn to_project(self) -> Project {
+	Project {
+	    id: self.project.id,
+	    name: self.project.name
+	}
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct HarvestProjectIdentification {
     id: u32,
     name: String,
 }
+
 
 #[derive(Debug, PartialEq)]
 pub struct Project {
@@ -25,43 +53,80 @@ pub struct Project {
 pub struct Projects {
     projects: Vec<Project>,
 }
-    
-impl Projects {
-    pub fn from(string: &str) -> Result<Projects> {
-	let assignments: HarvestProjectAssignments = serde_json::from_str(string)?;
-	let projects: Vec<Project> = assignments.project_assignments
-	    .into_iter()
-	    .map(|project| Project {
-		id: project.project.id,
-		name: project.project.name
-	    })
-	    .collect();
-	Ok(Projects {
-	    projects: projects
-	})
-    }
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn it_parses_json_into_object() {
-	let json = String::from(HARVEST_PROJECTS);
+    fn it_parses_json_into_harvest_project_assignments() {
+	let json = HARVEST_PROJECTS;
+
+	let object = HarvestProjectAssignments::from(json).unwrap();
+
 	assert_eq!(
-	    Projects::from(&json).unwrap(),
-	    Projects {
-		projects: vec![
-		    Project {
-			id: 95783638,
-			name: "lise Buddy".to_string()
+	    object,
+	    HarvestProjectAssignments {
+		project_assignments: vec![
+		    HarvestProject {
+			project: HarvestProjectIdentification {
+			    id: 95783638,
+			    name: "Buddy".to_string()
+			}
 		    }
 		]
 	    }
 	);
     }
+    
+    #[test]
+    fn it_creates_project() {
+	let harvest_project = HarvestProject {
+	    project: HarvestProjectIdentification {
+		id: 1234,
+		name: "project".to_string()
+	    }
+	};
 
+	let project = harvest_project.to_project();
+
+	assert_eq!(
+	    project,
+	    Project {
+		id: 1234,
+		name: "project".to_string()
+	    }
+	);
+    }
+
+    #[test]
+    fn it_creates_project_list() {
+	let harvest_project_assignements = HarvestProjectAssignments {
+	    project_assignments: vec![
+		HarvestProject {
+		    project: HarvestProjectIdentification {
+			id: 1234,
+			name: "project".to_string()
+		    }
+		}
+	    ]
+	};
+
+	let projects = harvest_project_assignements.to_projects().unwrap();
+
+	assert_eq!(
+	    projects,
+	    Projects{
+		projects: vec![
+		    Project {
+			id: 1234,
+			name: "project".to_string()
+		    }		    
+		]
+	    }
+	);
+    }
+    
     const HARVEST_PROJECTS: &str = r#"
 {
   "project_assignments": [
@@ -76,7 +141,7 @@ mod tests {
       "hourly_rate": null,
       "project": {
         "id": 95783638,
-        "name": "lise Buddy",
+        "name": "Buddy",
         "code": "buddy",
         "is_billable": true
       },
