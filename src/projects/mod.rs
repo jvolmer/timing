@@ -3,7 +3,8 @@ pub mod harvest;
 #[derive(Debug, PartialEq)]
 pub struct Project {
     id: u32,
-    name: String
+    name: String,
+    tasks: Tasks
 }
     
 #[derive(Debug, PartialEq)]

@@ -1,8 +1,7 @@
 mod project;
-mod tasks;
 
-use crate::projects::{Projects, Project};
-use crate::projects::harvest::project::{HarvestProject, HarvestProjectIdentification};
+use crate::projects::{Project, Projects};
+use crate::projects::harvest::project::{HarvestProject};
 use serde::{Deserialize};
 use serde_json::Result;
 
@@ -28,56 +27,36 @@ impl HarvestProjectAssignments {
 #[cfg(test)]
 mod tests {
     use super::*;
-    	
-    #[test]
-    fn it_parses_json_into_harvest_project_assignments() {
-	let json = HARVEST_PROJECTS;
-	
-	let object = HarvestProjectAssignments::from(json).unwrap();
-	    
-	assert_eq!(
-	    object,
-	    HarvestProjectAssignments {
-		project_assignments: vec![
-		    HarvestProject {
-			project: HarvestProjectIdentification {
-			    id: 95783638,
-			    name: "Buddy".to_string()
-			}
-		    }
-		]
-	    }
-	);
-    }
+    use crate::projects::{Task, Tasks};
 
     #[test]
-    fn it_creates_project_list() {
-	let harvest_project_assignements = HarvestProjectAssignments {
-	    project_assignments: vec![
-		HarvestProject {
-		    project: HarvestProjectIdentification {
-			id: 1234,
-			name: "project".to_string()
-		    }
-		}
-	    ]
-	};
-	    
-	let projects = harvest_project_assignements.to_projects();
-	    
+    fn if_parses_json_into_project_list() {
+	let json = HARVEST_PROJECTS;
+	
+	let harvest_projects = HarvestProjectAssignments::from(json).unwrap();
+	let projects = harvest_projects.to_projects();
+
 	assert_eq!(
 	    projects,
 	    Projects{
 		projects: vec![
 		    Project {
-			id: 1234,
-			name: "project".to_string()
+			id: 95783638,
+			name: "Buddy".to_string(),
+			tasks: Tasks {
+			    tasks: vec![
+				Task {
+				    id: 42180014,
+				    name: "Buddy (name buddy)".to_string()
+				}
+			    ]
+			}
 		    }		    
-		]
+		],
 	    }
-	);
+	);	
     }
-	
+    	
     const HARVEST_PROJECTS: &str = r#"
 {
   "project_assignments": [
