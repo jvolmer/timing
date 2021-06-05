@@ -1,6 +1,8 @@
-use super::Projects;
-use super::Project;
-    
+mod project;
+mod tasks;
+
+use crate::projects::{Projects, Project};
+use crate::projects::harvest::project::{HarvestProject, HarvestProjectIdentification};
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 
@@ -14,41 +16,19 @@ impl HarvestProjectAssignments {
 	serde_json::from_str(string)
     }
 	
-    pub fn to_projects(self) -> Result<Projects> {
+    pub fn to_projects(self) -> Projects {
 	let projects: Vec<Project> = self.project_assignments
 	    .into_iter()
 	    .map(|harvest_project| harvest_project.to_project())
 	    .collect();
-	Ok(Projects {
-	    projects: projects
-	})
+	Projects { projects }
     }
 }
-    
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct HarvestProject {
-    project: HarvestProjectIdentification,
-}
-    
-impl HarvestProject {
-    pub fn to_project(self) -> Project {
-	Project {
-	    id: self.project.id,
-	    name: self.project.name
-	}
-    }
-}
-    
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct HarvestProjectIdentification {
-    id: u32,
-    name: String,
-}
-        
+            
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+    	
     #[test]
     fn it_parses_json_into_harvest_project_assignments() {
 	let json = HARVEST_PROJECTS;
@@ -69,27 +49,7 @@ mod tests {
 	    }
 	);
     }
-	
-    #[test]
-    fn it_creates_project() {
-	let harvest_project = HarvestProject {
-	    project: HarvestProjectIdentification {
-		id: 1234,
-		name: "project".to_string()
-	    }
-	};
-	    
-	let project = harvest_project.to_project();
-	
-	assert_eq!(
-	    project,
-	    Project {
-		id: 1234,
-		name: "project".to_string()
-	    }
-	);
-    }
-	
+
     #[test]
     fn it_creates_project_list() {
 	let harvest_project_assignements = HarvestProjectAssignments {
@@ -103,7 +63,7 @@ mod tests {
 	    ]
 	};
 	    
-	let projects = harvest_project_assignements.to_projects().unwrap();
+	let projects = harvest_project_assignements.to_projects();
 	    
 	assert_eq!(
 	    projects,

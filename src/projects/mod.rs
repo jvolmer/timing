@@ -8,5 +8,6 @@ pub struct Project {
     
 #[derive(Debug, PartialEq)]
 pub struct Projects {
-    projects: Vec<Project>,
+    projects: Vec<Project>
+}
 }
