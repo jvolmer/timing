@@ -3,10 +3,10 @@ mod tasks;
 
 use crate::projects::{Projects, Project};
 use crate::projects::harvest::project::{HarvestProject, HarvestProjectIdentification};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 use serde_json::Result;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Debug, PartialEq)]
 pub struct HarvestProjectAssignments {
     project_assignments: Vec<HarvestProject>,
 }

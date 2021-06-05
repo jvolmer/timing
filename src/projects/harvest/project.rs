@@ -1,7 +1,7 @@
 use crate::projects::{Project};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Debug, PartialEq)]
 pub struct HarvestProject {
     pub project: HarvestProjectIdentification,
 }
@@ -15,7 +15,7 @@ impl HarvestProject {
     }
 }
     
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Deserialize, Debug, PartialEq)]
 pub struct HarvestProjectIdentification {
     pub id: u32,
     pub name: String,
