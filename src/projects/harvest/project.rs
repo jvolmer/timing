@@ -1,4 +1,7 @@
-use crate::projects::{Project, Task, Tasks};
+use crate::projects::project::{Project, ProjectBuilder};
+use crate::projects::task::Task;
+use crate::projects::tasks::TasksBuilder;
+use crate::projects::harvest::task::HarvestTask;
 use serde::{Deserialize};
 
 #[derive(Deserialize, Debug, PartialEq)]
@@ -14,11 +17,13 @@ impl HarvestProject {
 	    .map(|harvest_task| harvest_task.to_task())
 	    .collect();
 
-	Project {
-	    id: self.project.id,
-	    name: self.project.name,
-	    tasks: Tasks { tasks }
-	}
+	ProjectBuilder::new()
+	    .with_name(self.project.name)
+	    .with_id(self.project.id)
+	    .with_tasks(TasksBuilder::new()
+			.with_tasks(tasks)
+			.build())
+	    .build()
     }
 }
     
@@ -28,30 +33,13 @@ pub struct HarvestProjectIdentification {
     pub name: String,
 }
 
-#[derive(Deserialize, Debug, PartialEq)]
-pub struct HarvestTask {
-    pub task: HarvestTaskIdentification
-}
-
-impl HarvestTask {
-    pub fn to_task(self) -> Task {
-	Task {
-	    id: self.task.id,
-	    name: self.task.name
-	}
-    }
-}
-
-#[derive(Deserialize, Debug, PartialEq)]
-pub struct HarvestTaskIdentification {
-    pub id: u32,
-    pub name: String
-}
 
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::projects::harvest::task::{HarvestTask, HarvestTaskIdentification};
+    use crate::projects::task::TaskBuilder;
     	
     #[test]
     fn it_creates_project() {
@@ -75,38 +63,17 @@ mod tests {
 	
 	assert_eq!(
 	    project,
-	    Project {
-		id: 1234,
-		name: "project".to_string(),
-		tasks: Tasks {
-		    tasks: vec![
-			Task {
-			    id: 999,
-			    name: "task".to_string()
-			}
-		    ]
-		}
-	    }
-	);
-    }
-
-    #[test]
-    fn it_creates_task() {
-	let harvest_task = HarvestTask {
-	    task: HarvestTaskIdentification {
-		id: 4343,
-		name: "task".to_string()
-	    }
-	};
-
-	let task = harvest_task.to_task();
-
-	assert_eq!(
-	    task,
-	    Task {
-		id: 4343,
-		name: "task".to_string()
-	    }
+	    ProjectBuilder::new()
+		.with_id(1234)
+		.with_name("project".to_string())
+		.with_tasks(TasksBuilder::new()
+			    .with_tasks(vec![
+				TaskBuilder::new()
+				    .with_id(999)
+				    .with_name("task".to_string())
+				    .build()])
+			    .build())
+		.build()
 	);
     }
 }
