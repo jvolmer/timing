@@ -1,7 +1,15 @@
+use crate::projects::named::Named;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Task {
     id: u32,
     name: String
+}
+
+impl Named for Task {
+    fn name(&self) -> &str {
+	&self.name
+    }
 }
 
 
