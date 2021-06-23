@@ -2,7 +2,7 @@ use chrono::prelude::*;
 use crate::parser::parse_error::ParseError;
 
 #[derive(Debug, PartialEq)]
-struct ParsedTiming {
+struct ParsedActivity {
     start: DateTime<Local>,
     end: DateTime<Local>,
     project: String,
@@ -10,23 +10,23 @@ struct ParsedTiming {
     description: String
 }
 
-struct TimingLine {
+struct ActivityLine {
     line: String
 }
     
-impl TimingLine {
+impl ActivityLine {
     fn new(line: &str) -> Self {
-	TimingLine {
+	ActivityLine {
 	    line: line.to_string()
 	}
     }
     
-    fn parse(&self) -> Result<ParsedTiming, ParseError> {
+    fn parse(&self) -> Result<ParsedActivity, ParseError> {
 	let parts = self.line.split(" | ").collect::<Vec<&str>>();
 	if parts.len() < 7 {
 	    return Err(ParseError::new("Too few arguments given".to_string()))
 	}
-	Ok(ParsedTiming {
+	Ok(ParsedActivity {
 	    start: string_to_local_date(parts.get(1).unwrap()).unwrap(),
 	    end: string_to_local_date(parts.get(2).unwrap()).unwrap(),
 	    project: parts.get(3).unwrap().to_string(),
@@ -47,7 +47,7 @@ mod tests {
 
     #[test]
     fn it_throws_when_not_enough_columns_are_given() {
-	let line = TimingLine::new(" | Bla | Bla | ");
+	let line = ActivityLine::new(" | Bla | Bla | ");
 
 	let parsed_line = line.parse();
 
@@ -56,11 +56,11 @@ mod tests {
 
     #[test]
     fn it_parses_a_full_timing_line() {
-	let line = TimingLine::new(" | 2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Task | Description | ");
+	let line = ActivityLine::new(" | 2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Task | Description | ");
 
 	let parsed_line = line.parse();
 
-	assert_eq!(parsed_line, Ok(ParsedTiming {
+	assert_eq!(parsed_line, Ok(ParsedActivity {
 	    start: Local.ymd(2020, 1, 12).and_hms(8, 0, 0),
 	    end: Local.ymd(2020, 1, 12).and_hms(8, 30, 0),
 	    project: "Project".to_string(),

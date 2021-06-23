@@ -1,3 +1,3 @@
 pub mod week_start;
-pub mod timing_parser;
+pub mod activity_line;
 pub mod parse_error;
