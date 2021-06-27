@@ -1,4 +1,4 @@
-use crate::projects::project::{Project, ProjectBuilder};
+use crate::projects::project::{ProjectWithTasks, ProjectWithTasksBuilder};
 use crate::projects::task::Task;
 use crate::projects::tasks::TasksBuilder;
 use crate::projects::harvest::task::HarvestTask;
@@ -11,13 +11,13 @@ pub struct HarvestProject {
 }
     
 impl HarvestProject {
-    pub fn to_project(self) -> Project {
+    pub fn to_project(self) -> ProjectWithTasks {
 	let tasks: Vec<Task> = self.task_assignments
 	    .into_iter()
 	    .map(|harvest_task| harvest_task.to_task())
 	    .collect();
 
-	ProjectBuilder::new()
+	ProjectWithTasksBuilder::new()
 	    .with_name(self.project.name)
 	    .with_id(self.project.id)
 	    .with_tasks(TasksBuilder::new()
@@ -63,7 +63,7 @@ mod tests {
 	
 	assert_eq!(
 	    project,
-	    ProjectBuilder::new()
+	    ProjectWithTasksBuilder::new()
 		.with_id(1234)
 		.with_name("project".to_string())
 		.with_tasks(TasksBuilder::new()

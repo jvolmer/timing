@@ -5,19 +5,19 @@ use crate::projects::project_error::ProjectError;
 use crate::projects::list_with_names::ListWithNames;
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Project {
+pub struct ProjectWithTasks {
     id: u32,
     name: String,
     tasks: Tasks
 }
 
-impl Named for Project {
+impl Named for ProjectWithTasks {
     fn name(&self) -> &str {
 	&self.name
     }
 }
 
-impl Project {
+impl ProjectWithTasks {
     pub fn find_task(&self, search_string: &str) -> Result<&Task, ProjectError> {
 	self.tasks.find(search_string)
     }
@@ -34,7 +34,7 @@ mod tests {
 	let expected_task = TaskBuilder::new()
 	    .with_name("Task with some speciality".to_string())
 	    .build();
-	let project = ProjectBuilder::new()
+	let project = ProjectWithTasksBuilder::new()
 	    .with_tasks(TasksBuilder::new()
 			.with_tasks(vec![
 			    expected_task.clone()])
@@ -48,13 +48,13 @@ mod tests {
 }
 
 
-pub struct ProjectBuilder {
+pub struct ProjectWithTasksBuilder {
     id: u32,
     name: String,
     tasks: Tasks
 }
 
-impl ProjectBuilder {
+impl ProjectWithTasksBuilder {
     pub fn new() -> Self {
 	Self {
 	    id: 1,
@@ -78,8 +78,8 @@ impl ProjectBuilder {
 	self
     }
     
-    pub fn build(self) -> Project {
-	Project{
+    pub fn build(self) -> ProjectWithTasks {
+	ProjectWithTasks {
 	    id: self.id,
 	    name: self.name,
 	    tasks: self.tasks
