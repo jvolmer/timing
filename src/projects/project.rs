@@ -18,10 +18,11 @@ impl Named for Project {
 }
 
 impl Project {
-    fn find_task(&self, search_string: &str) -> Result<&Task, ProjectError> {
+    pub fn find_task(&self, search_string: &str) -> Result<&Task, ProjectError> {
 	self.tasks.find(search_string)
     }
 }
+
 
 #[cfg(test)]
 mod tests {
