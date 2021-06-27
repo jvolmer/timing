@@ -1,14 +1,6 @@
 use chrono::prelude::*;
 use crate::parser::parse_error::ParseError;
-
-#[derive(Debug, PartialEq)]
-struct ParsedActivity {
-    start: DateTime<Local>,
-    end: DateTime<Local>,
-    project: String,
-    task: String,
-    description: String
-}
+use crate::activity::parsed_activity::ParsedActivity;
 
 struct ActivityLine {
     line: String
@@ -26,13 +18,13 @@ impl ActivityLine {
 	if parts.len() < 7 {
 	    return Err(ParseError::new("Too few arguments given"))
 	}
-	Ok(ParsedActivity {
-	    start: string_to_local_date(parts.get(1).unwrap()).unwrap(),
-	    end: string_to_local_date(parts.get(2).unwrap()).unwrap(),
-	    project: parts.get(3).unwrap().to_string(),
-	    task :parts.get(4).unwrap().to_string(),
-	    description: parts.get(5).unwrap().to_string()
-	})
+	Ok(ParsedActivity::from(
+	    string_to_local_date(parts.get(1).unwrap()).unwrap(),
+	    string_to_local_date(parts.get(2).unwrap()).unwrap(),
+	    parts.get(3).unwrap().to_string(),
+	    parts.get(4).unwrap().to_string(),
+	    parts.get(5).unwrap().to_string()
+	))
     }	
 }
 
@@ -60,12 +52,12 @@ mod tests {
 
 	let parsed_line = line.parse();
 
-	assert_eq!(parsed_line, Ok(ParsedActivity {
-	    start: Local.ymd(2020, 1, 12).and_hms(8, 0, 0),
-	    end: Local.ymd(2020, 1, 12).and_hms(8, 30, 0),
-	    project: "Project".to_string(),
-	    task: "Task".to_string(),
-	    description: "Description".to_string()
-	}));
+	assert_eq!(parsed_line, Ok(ParsedActivity::from(
+	    Local.ymd(2020, 1, 12).and_hms(8, 0, 0),
+	    Local.ymd(2020, 1, 12).and_hms(8, 30, 0),
+	    "Project".to_string(),
+	    "Task".to_string(),
+	    "Description".to_string()
+	)));
     }
 }
