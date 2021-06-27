@@ -1,4 +1,4 @@
-use crate::projects::project::ProjectWithTasks;
+use crate::projects::project::{ProjectWithTasks, Project};
 use crate::projects::project_error::ProjectError;
 use crate::projects::task::Task;
 use crate::projects::list_with_names::ListWithNames;
@@ -15,10 +15,11 @@ impl ListWithNames<ProjectWithTasks> for Projects {
  }
 
 impl Projects {
-    fn find_project_with_task(&self, project_string: &str, task_string: &str) -> Result<(&ProjectWithTasks, &Task), ProjectError> {
-	let project = self.find(project_string)?;
-	let task = project.find_task(task_string)?;
-	Ok((&project, task))
+    fn get_project_with_task(&self, project_string: &str, task_string: &str) -> Result<(Project, Task), ProjectError> {
+	let project_with_tasks = self.find(project_string)?;
+	let project = Project::new(project_with_tasks);
+	let task = project_with_tasks.find_task(task_string)?;
+	Ok((project, task.clone()))
     }
 }
 
@@ -53,10 +54,10 @@ mod tests {
 	    ])
 	    .build();
 
-	let (project, task) = projects.find_project_with_task("specific project", "special task").unwrap();
+	let (project, task) = projects.get_project_with_task("specific project", "special task").unwrap();
 
-	assert_eq!(project, &project_to_be_found);
-	assert_eq!(task, &task_to_be_found);
+	assert_eq!(project, Project::new(&project_to_be_found));
+	assert_eq!(task, task_to_be_found);
     }
 }
 

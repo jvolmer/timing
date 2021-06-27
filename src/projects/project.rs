@@ -86,3 +86,19 @@ impl ProjectWithTasksBuilder {
 	}
     }
 }
+
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Project {
+    id: u32,
+    name: String,
+}
+
+impl Project {
+    pub fn new(project_with_tasks: &ProjectWithTasks) -> Self {
+	Self {
+	    id: project_with_tasks.id.clone(),
+	    name: project_with_tasks.name.clone()
+	}
+    }
+}
