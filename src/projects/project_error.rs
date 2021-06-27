@@ -1,29 +1,20 @@
 use std::fmt;
 
 #[derive(Debug, PartialEq)]
-pub struct ParseError {
+pub struct ProjectError {
     from: String,
     message: String
 }
 
-impl fmt::Display for ParseError {
+impl fmt::Display for ProjectError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 	write!(f, "{}: {}", self.from, self.message)
     }
 }
 
-impl From<chrono::ParseError> for ParseError {
-    fn from(error: chrono::ParseError) -> Self {
-	ParseError {
-	    from: "chrono".to_string(),
-	    message: error.to_string()
-	}
-    }
-}
-
-impl ParseError {
+impl ProjectError {
     pub fn new(message: &str) -> Self {
-	ParseError {
+	Self {
 	    from: "timing".to_string(),
 	    message: message.to_string()
 	}

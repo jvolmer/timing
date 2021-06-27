@@ -5,3 +5,4 @@ pub mod tasks;
 pub mod harvest;
 pub mod named;
 pub mod list_with_names;
+pub mod project_error;

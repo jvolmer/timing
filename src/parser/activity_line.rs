@@ -24,7 +24,7 @@ impl ActivityLine {
     fn parse(&self) -> Result<ParsedActivity, ParseError> {
 	let parts = self.line.split(" | ").collect::<Vec<&str>>();
 	if parts.len() < 7 {
-	    return Err(ParseError::new("Too few arguments given".to_string()))
+	    return Err(ParseError::new("Too few arguments given"))
 	}
 	Ok(ParsedActivity {
 	    start: string_to_local_date(parts.get(1).unwrap()).unwrap(),
@@ -51,7 +51,7 @@ mod tests {
 
 	let parsed_line = line.parse();
 
-	assert_eq!(parsed_line, Err(ParseError::new("Too few arguments given".to_string())))
+	assert_eq!(parsed_line, Err(ParseError::new("Too few arguments given")))
     }
 
     #[test]
