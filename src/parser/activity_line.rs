@@ -16,11 +16,13 @@ impl ActivityLine {
     fn parse(&self) -> Result<ParsedActivity, ParseError> {
 	let parts = self.line.split(" | ").collect::<Vec<&str>>();
 	if parts.len() < 7 {
-	    return Err(ParseError::new("Too few arguments given"))
+	    return Err(ParseError::TooFewArguments)
 	}
 	Ok(ParsedActivity::from(
-	    string_to_local_date(parts.get(1).unwrap()).unwrap(),
-	    string_to_local_date(parts.get(2).unwrap()).unwrap(),
+	    string_to_local_date(parts.get(1).unwrap())
+		.map_err(|err| ParseError::StartNotConvertableToDateTime(err.to_string()))?,
+	    string_to_local_date(parts.get(2).unwrap())
+		.map_err(|err| ParseError::EndNotConvertableToDateTime(err.to_string()))?,
 	    parts.get(3).unwrap().to_string(),
 	    parts.get(4).unwrap().to_string(),
 	    parts.get(5).unwrap().to_string()
@@ -29,7 +31,8 @@ impl ActivityLine {
 }
 
 fn string_to_local_date(string: &str) -> Result<DateTime<Local>, ParseError> {
-    let naive_time = string.parse::<NaiveDateTime>()?;
+    let naive_time = string.parse::<NaiveDateTime>()
+	.map_err(|_| ParseError::NotConvertableToDateTime)?;
     Ok( Local.from_local_datetime(&naive_time).unwrap() )
 }
 
@@ -38,12 +41,21 @@ mod tests {
     use super::*;
 
     #[test]
+    fn it_throws_when_start_cannot_be_converted_to_date_time() {
+	let line = ActivityLine::new(" | A2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Task | Description | ");
+	
+	let parsed_line = line.parse();
+	
+	assert_eq!(parsed_line, Err(ParseError::StartNotConvertableToDateTime(ParseError::NotConvertableToDateTime.to_string())))
+    }
+    
+    #[test]
     fn it_throws_when_not_enough_columns_are_given() {
 	let line = ActivityLine::new(" | Bla | Bla | ");
 
 	let parsed_line = line.parse();
 
-	assert_eq!(parsed_line, Err(ParseError::new("Too few arguments given")))
+	assert_eq!(parsed_line, Err(ParseError::TooFewArguments))
     }
 
     #[test]

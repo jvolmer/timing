@@ -1,31 +1,21 @@
 use std::fmt;
 
 #[derive(Debug, PartialEq)]
-pub struct ParseError {
-    from: String,
-    message: String
+pub enum ParseError {
+    NotConvertableToDateTime,
+    StartNotConvertableToDateTime(String),
+    EndNotConvertableToDateTime(String),
+    TooFewArguments
 }
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-	write!(f, "{}: {}", self.from, self.message)
-    }
-}
-
-impl From<chrono::ParseError> for ParseError {
-    fn from(error: chrono::ParseError) -> Self {
-	ParseError {
-	    from: "chrono".to_string(),
-	    message: error.to_string()
-	}
-    }
-}
-
-impl ParseError {
-    pub fn new(message: &str) -> Self {
-	ParseError {
-	    from: "timing".to_string(),
-	    message: message.to_string()
+	let error_name = "ParseError";
+	match &self {
+	    Self::NotConvertableToDateTime => write!(f, "{}: String is not convertable to date time", error_name),
+	    Self::StartNotConvertableToDateTime(message) => write!(f, "Start | {}: {}", error_name, message),
+	    Self::EndNotConvertableToDateTime(message) => write!(f, "End | {}: {}", error_name, message),
+	    Self::TooFewArguments => write!(f, "All | {}: Too few arguments given", error_name)
 	}
     }
 }
