@@ -1,18 +1,18 @@
 use crate::projects::named::Named;
-use crate::projects::project_error::ProjectError;
+use crate::projects::project_error::SearchError;
 
 pub trait ListWithNames<T: Named> {
     fn items(&self) -> std::slice::Iter<T>;
 
-    fn find(&self, search_string: &str) -> Result<&T, ProjectError> {
+    fn find(&self, search_string: &str) -> Result<&T, SearchError> {
 	let found: Vec<&T> = self.items()
 	    .filter(|item| item.has_name_with(search_string))
 	    .collect();
 
 	match found.len() {
 	    1 => Ok(found.get(0).unwrap()),
-	    0 => Err(ProjectError::new("No project found")),
-	    _ => Err(ProjectError::new("More than one project found"))
+	    0 => Err(SearchError::NotFound),
+	    _ => Err(SearchError::FoundMoreThanOne),
 	}
     }
 }
@@ -58,7 +58,7 @@ mod tests {
 	
 	let found_items = list.find("new");
 	
-	assert_eq!(found_items, Err(ProjectError::new("No project found")));
+	assert_eq!(found_items, Err(SearchError::NotFound));
     }
 
     #[test]
@@ -73,6 +73,6 @@ mod tests {
 	
 	let found_items = list.find("new");
 	
-	assert_eq!(found_items, Err(ProjectError::new("More than one project found")));
+	assert_eq!(found_items, Err(SearchError::FoundMoreThanOne));
     }
 }

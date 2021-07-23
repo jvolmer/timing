@@ -16,7 +16,8 @@ impl ListWithNames<ProjectWithTasks> for Projects {
 
 impl Projects {
     pub fn get_project_with_task(&self, project_string: &str, task_string: &str) -> Result<(Project, Task), ProjectError> {
-	let project_with_tasks = self.find(project_string)?;
+	let project_with_tasks = self.find(project_string)
+	    .map_err(|err| ProjectError::Project(err))?;
 	let project = Project::new(project_with_tasks);
 	let task = project_with_tasks.find_task(task_string)?;
 	Ok((project, task.clone()))

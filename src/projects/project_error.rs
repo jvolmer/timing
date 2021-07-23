@@ -1,22 +1,22 @@
 use std::fmt;
 
 #[derive(Debug, PartialEq)]
-pub struct ProjectError {
-    from: String,
-    message: String
+pub enum ProjectError {
+    Project(SearchError),
+    Task(SearchError)
 }
 
-impl fmt::Display for ProjectError {
+#[derive(Debug, PartialEq)]
+pub enum SearchError {
+    NotFound,
+    FoundMoreThanOne
+}
+
+impl fmt::Display for SearchError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-	write!(f, "{}: {}", self.from, self.message)
-    }
-}
-
-impl ProjectError {
-    pub fn new(message: &str) -> Self {
-	Self {
-	    from: "timing".to_string(),
-	    message: message.to_string()
+	match &self {
+	    Self::NotFound => write!(f, "No match was found"),
+	    Self::FoundMoreThanOne => write!(f, "More than one match was found"),
 	}
     }
 }

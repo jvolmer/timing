@@ -20,6 +20,7 @@ impl Named for ProjectWithTasks {
 impl ProjectWithTasks {
     pub fn find_task(&self, search_string: &str) -> Result<&Task, ProjectError> {
 	self.tasks.find(search_string)
+	    .map_err(|err| ProjectError::Task(err))
     }
 }
 
