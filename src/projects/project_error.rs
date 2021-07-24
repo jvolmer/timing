@@ -6,6 +6,16 @@ pub enum ProjectError {
     Task(SearchError)
 }
 
+impl fmt::Display for ProjectError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+	match &self {
+	    Self::Project(error) => write!(f, "Project | ProjectError: {}", error),
+	    Self::Task(error) => write!(f, "Task | ProjectError: {}", error),
+	}
+    }
+}
+
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum SearchError {
     NotFound,

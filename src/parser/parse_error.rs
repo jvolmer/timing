@@ -18,17 +18,17 @@ impl fmt::Display for ParseError {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ArgumentParseError {
-    StartNotConvertableToDateTime(String),
-    EndNotConvertableToDateTime(String),
+    Start(DateTimeParseError),
+    End(DateTimeParseError),
     ProjectAndTask
 }
 
 impl fmt::Display for ArgumentParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 	match &self {
-	    Self::StartNotConvertableToDateTime(message) => write!(f, "Start | ParseError: {}", message),
-	    Self::EndNotConvertableToDateTime(message) => write!(f, "End | ParseError: {}", message),
-	    Self::ProjectAndTask => write!(f, "bla"),
+	    Self::Start(error) => write!(f, "Start | ParseError: {}", error),
+	    Self::End(error) => write!(f, "End | ParseError: {}", error),
+	    Self::ProjectAndTask => write!(f, "{}", self),
 	}
     }
 }

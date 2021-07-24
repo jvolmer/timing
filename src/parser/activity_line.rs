@@ -58,10 +58,10 @@ impl ActivityLine {
 	let vec = vec![
 	    start
 		.map(|start| Argument::DateTime(start))
-		.map_err(|err| ArgumentParseError::StartNotConvertableToDateTime(err.to_string())),
+		.map_err(|err| ArgumentParseError::Start(err)),
 	    end
 		.map(|end| Argument::DateTime(end))
-		.map_err(|err| ArgumentParseError::EndNotConvertableToDateTime(err.to_string())),
+		.map_err(|err| ArgumentParseError::End(err)),
 	    project_and_task
 		.map(|pt| Argument::ProjectAndTask(pt))
 		.map_err(|_| ArgumentParseError::ProjectAndTask)
@@ -129,7 +129,7 @@ mod tests {
 	let parsed_line = line.parse(&projects());
 	
 	assert_eq!(parsed_line, Err(ParseError::ArgumentErrors(vec![
-	    ArgumentParseError::StartNotConvertableToDateTime(DateTimeParseError::NotConvertible.to_string())
+	    ArgumentParseError::Start(DateTimeParseError::NotConvertible)
 	])))
     }
     
@@ -149,8 +149,8 @@ mod tests {
 	let parsed_line = line.parse(&projects());
 	
 	assert_eq!(parsed_line, Err(ParseError::ArgumentErrors(vec![
-	    ArgumentParseError::StartNotConvertableToDateTime(DateTimeParseError::NotConvertible.to_string()),
-	    ArgumentParseError::EndNotConvertableToDateTime(DateTimeParseError::NotConvertible.to_string())
+	    ArgumentParseError::Start(DateTimeParseError::NotConvertible),
+	    ArgumentParseError::End(DateTimeParseError::NotConvertible)
 	])))
     }
     
