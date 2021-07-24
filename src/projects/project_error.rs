@@ -1,12 +1,12 @@
 use std::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ProjectError {
     Project(SearchError),
     Task(SearchError)
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum SearchError {
     NotFound,
     FoundMoreThanOne
