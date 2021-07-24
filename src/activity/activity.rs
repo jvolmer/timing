@@ -1,22 +1,34 @@
+use crate::activity::time::{Start, End};
 use crate::projects::{project::Project, task::Task};
-use chrono::prelude::*;
+
+#[derive(Debug, PartialEq)]
+pub struct Description {
+    text: String
+}
+
+impl Description {
+    pub fn new(text: String) -> Self {
+	Self { text }
+    }
+}
+
 
 #[derive(Debug, PartialEq)]
 pub struct Activity {
-    start: DateTime<Local>,
-    end: DateTime<Local>,
+    start: Start,
+    end: End,
     project: Project,
     task: Task,
-    description: String
+    description: Description
 }
 
 impl Activity {
     pub fn from(
-	start: DateTime<Local>,
-	end: DateTime<Local>,
+	start: Start,
+	end: End,
 	project: Project,
 	task: Task,
-	description: String
+	description: Description
     ) -> Self {
 	Self { start, end, project, task, description }
     }

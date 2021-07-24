@@ -1,8 +1,7 @@
+use crate::activity::time::{Start, End};
 use crate::projects::project_error::ProjectError;
 use crate::projects::task::Task;
 use crate::projects::project::Project;
-use chrono::Local;
-use chrono::DateTime;
 use std::fmt;
 
 #[derive(Debug, PartialEq)]
@@ -25,14 +24,15 @@ impl fmt::Display for ParseError {
 
 #[derive(Clone, Debug)]
 enum Argument {
-    DateTime(DateTime<Local>),
+    Start(Start),
+    End(End),
     ProjectAndTask((Project, Task)),
 }
 
 impl ParseError {
     pub fn from_arguments(
-	start: &Result<DateTime<Local>, DateTimeParseError>,
-	end: &Result<DateTime<Local>, DateTimeParseError>,
+	start: &Result<Start, DateTimeParseError>,
+	end: &Result<End, DateTimeParseError>,
 	project_and_task: &Result<(Project, Task), ProjectError>
     ) -> Result<(), ParseError> {
 	let vec = vec![
@@ -54,15 +54,15 @@ impl ParseError {
 	Ok(())
     }
 
-    fn map_start(start: &Result<DateTime<Local>, DateTimeParseError>) -> Result<Argument, ArgumentParseError> {
+    fn map_start(start: &Result<Start, DateTimeParseError>) -> Result<Argument, ArgumentParseError> {
 	start.clone()
-	    .map(|start| Argument::DateTime(start))
+	    .map(|start| Argument::Start(start))
 	    .map_err(|err| ArgumentParseError::Start(err))
     }
 
-    fn map_end(end: &Result<DateTime<Local>, DateTimeParseError>) -> Result<Argument, ArgumentParseError> {
+    fn map_end(end: &Result<End, DateTimeParseError>) -> Result<Argument, ArgumentParseError> {
 	end.clone()
-	    .map(|end| Argument::DateTime(end))
+	    .map(|end| Argument::End(end))
 	    .map_err(|err| ArgumentParseError::End(err))
     }
 
@@ -112,8 +112,8 @@ mod tests {
 
     #[test]
     fn it_collects_no_error_when_all_arguments_are_ok() {
-	let start = Result::Ok(Local.ymd(2020, 1, 12).and_hms(8, 0, 0));
-	let end = Result::Ok(Local.ymd(2020, 1, 12).and_hms(8, 0, 0));
+	let start = Result::Ok(Start::new(Local.ymd(2020, 1, 12).and_hms(8, 0, 0)));
+	let end = Result::Ok(End::new(Local.ymd(2020, 1, 12).and_hms(8, 0, 0)));
 	let project_and_task = Result::Ok((
 	    ProjectBuilder::new().build(),
 	    TaskBuilder::new().build()
@@ -138,5 +138,4 @@ mod tests {
 	    ArgumentParseError::ProjectAndTask,
 	])));
     }
-
 }

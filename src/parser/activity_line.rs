@@ -1,7 +1,8 @@
+use crate::activity::activity::Description;
 use crate::activity::activity::Activity;
 use crate::projects::projects::Projects;
-use chrono::prelude::*;
-use crate::parser::parse_error::{ParseError, DateTimeParseError};
+use crate::parser::parse_error::ParseError;
+use crate::parser::time;
 
 struct ActivityLine {
     line: String
@@ -17,13 +18,13 @@ impl ActivityLine {
     fn parse(&self, projects: &Projects) -> Result<Activity, ParseError> {
 	let parts = Self::split(&self.line)?;
   
-	let start = string_to_local_date(parts.get(1).unwrap());
-	let end = string_to_local_date(parts.get(2).unwrap());
+	let start = time::start(parts.get(1).unwrap());
+	let end = time::end(parts.get(2).unwrap());
 	let project_and_task = projects.get_project_with_task(
 	    &parts.get(3).unwrap(),
 	    &parts.get(4).unwrap()
 	);
-	let description = parts.get(5).unwrap().to_string();
+	let description = Description::new(parts.get(5).unwrap().to_string());
 	
 	ParseError::from_arguments(&start, &end, &project_and_task)?;
 
@@ -46,16 +47,12 @@ impl ActivityLine {
     }
 }
 
-fn string_to_local_date(string: &str) -> Result<DateTime<Local>, DateTimeParseError> {
-    let naive_time = string.parse::<NaiveDateTime>()
-	.map_err(|_| DateTimeParseError::NotConvertible)?;
-    Ok( Local.from_local_datetime(&naive_time).unwrap() )
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parser::parse_error::ArgumentParseError;
+    use chrono::prelude::*;
+    use crate::activity::time::{Start, End};
+    use crate::parser::parse_error::{ArgumentParseError, DateTimeParseError};
     use crate::projects::{
 	projects::ProjectsBuilder,
 	project::{Project, ProjectWithTasks, ProjectWithTasksBuilder},
@@ -128,11 +125,11 @@ mod tests {
 	let parsed_line = line.parse(&projects());
 
 	assert_eq!(parsed_line, Ok(Activity::from(
-	    Local.ymd(2020, 1, 12).and_hms(8, 0, 0),
-	    Local.ymd(2020, 1, 12).and_hms(8, 30, 0),
+	    Start::new(Local.ymd(2020, 1, 12).and_hms(8, 0, 0)),
+	    End::new(Local.ymd(2020, 1, 12).and_hms(8, 30, 0)),
 	    Project::new(&project()),
 	    task(),
-	    "Description".to_string()
+	    Description::new("Description".to_string())
 	)));
     }
 
@@ -164,10 +161,10 @@ mod tests {
 	let activity = line.parse(&projects);
 
 	assert_eq!(activity, Ok(Activity::from(
-	    Local.ymd(2020, 1, 12).and_hms(8, 0, 0),
-	    Local.ymd(2020, 1, 12).and_hms(8, 30, 0),
+	    Start::new(Local.ymd(2020, 1, 12).and_hms(8, 0, 0)),
+	    End::new(Local.ymd(2020, 1, 12).and_hms(8, 30, 0)),
 	    Project::new(&project_to_be_found),
 	    task_to_be_found,
-	    "some description".to_string())));
+	    Description::new("some description".to_string()))));
     }
 }
