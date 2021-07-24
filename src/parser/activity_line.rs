@@ -1,7 +1,7 @@
+use crate::activity::activity::Activity;
 use crate::projects::projects::Projects;
 use chrono::prelude::*;
 use crate::parser::parse_error::{ParseError, DateTimeParseError};
-use crate::activity::parsed_activity::ParsedActivity;
 
 struct ActivityLine {
     line: String
@@ -14,8 +14,7 @@ impl ActivityLine {
 	}
     }
     
-    fn parse(&self, projects: &Projects) -> Result<ParsedActivity, ParseError> {
-
+    fn parse(&self, projects: &Projects) -> Result<Activity, ParseError> {
 	let parts = Self::split(&self.line)?;
   
 	let start = string_to_local_date(parts.get(1).unwrap());
@@ -24,15 +23,17 @@ impl ActivityLine {
 	    &parts.get(3).unwrap(),
 	    &parts.get(4).unwrap()
 	);
+	let description = parts.get(5).unwrap().to_string();
 	
 	ParseError::from_arguments(&start, &end, &project_and_task)?;
-	
-	Ok(ParsedActivity::from(
+
+	let (project, task) = project_and_task.unwrap();
+	Ok(Activity::from(
 	    start.unwrap(),
 	    end.unwrap(),
-	    parts.get(3).unwrap().to_string(),
-	    parts.get(4).unwrap().to_string(),
-	    parts.get(5).unwrap().to_string()
+	    project,
+	    task,
+	    description
 	))
     }
 
@@ -57,26 +58,33 @@ mod tests {
     use crate::parser::parse_error::ArgumentParseError;
     use crate::projects::{
 	projects::ProjectsBuilder,
-	project::ProjectWithTasksBuilder,
-	task::TaskBuilder,
+	project::{Project, ProjectWithTasks, ProjectWithTasksBuilder},
+	task::{Task, TaskBuilder},
 	tasks::TasksBuilder
     };
+
+    fn task() -> Task {
+	TaskBuilder::new()
+	    .with_name("Some specific task".to_string())
+	    .build()
+    }
+    
+    fn project() -> ProjectWithTasks {
+	ProjectWithTasksBuilder::new()
+	    .with_name("Some specific project".to_string())
+	    .with_tasks(TasksBuilder::new()
+			.with_tasks(vec![
+			    task()
+			])
+			.build()
+	    )
+ 	    .build()
+    }
     
     fn projects() -> Projects {
   	ProjectsBuilder::new()
 	    .with_projects(vec![
-		ProjectWithTasksBuilder::new()
-		    .with_name("Some specific project".to_string())
-		    .with_tasks(TasksBuilder::new()
-				.with_tasks(vec![
-				    TaskBuilder::new()
-					.with_name("Some specific task".to_string())
-					.build()
-				])
-				.build()
-		    )
- 		    .build()
-		    
+		project()
 	    ])
 	    .build()
     }
@@ -85,9 +93,9 @@ mod tests {
     fn it_throws_when_start_cannot_be_converted_to_date_time() {
 	let line = ActivityLine::new(" | A2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Task | Description | ");
 	
-	let parsed_line = line.parse(&projects());
+	let activity = line.parse(&projects());
 	
-	assert_eq!(parsed_line, Err(ParseError::ArgumentErrors(vec![
+	assert_eq!(activity, Err(ParseError::ArgumentErrors(vec![
 	    ArgumentParseError::Start(DateTimeParseError::NotConvertible)
 	])))
     }
@@ -96,18 +104,18 @@ mod tests {
     fn it_throws_when_not_enough_columns_are_given() {
 	let line = ActivityLine::new(" | Bla | Bla | ");
 
-	let parsed_line = line.parse(&projects());
+	let activity = line.parse(&projects());
 
-	assert_eq!(parsed_line, Err(ParseError::TooFewArguments))
+	assert_eq!(activity, Err(ParseError::TooFewArguments))
     }
 
     #[test]
     fn it_throws_when_start_and_end_cannot_be_converted_to_date_time() {
 	let line = ActivityLine::new(" | A2020-01-12T08:00:00 | B2020-01-12T08:30:00 | Project | Task | Description | ");
 	
-	let parsed_line = line.parse(&projects());
+	let activity = line.parse(&projects());
 	
-	assert_eq!(parsed_line, Err(ParseError::ArgumentErrors(vec![
+	assert_eq!(activity, Err(ParseError::ArgumentErrors(vec![
 	    ArgumentParseError::Start(DateTimeParseError::NotConvertible),
 	    ArgumentParseError::End(DateTimeParseError::NotConvertible)
 	])))
@@ -119,12 +127,47 @@ mod tests {
 
 	let parsed_line = line.parse(&projects());
 
-	assert_eq!(parsed_line, Ok(ParsedActivity::from(
+	assert_eq!(parsed_line, Ok(Activity::from(
 	    Local.ymd(2020, 1, 12).and_hms(8, 0, 0),
 	    Local.ymd(2020, 1, 12).and_hms(8, 30, 0),
-	    "Project".to_string(),
-	    "Task".to_string(),
+	    Project::new(&project()),
+	    task(),
 	    "Description".to_string()
 	)));
+    }
+
+    #[test]
+    fn it_finds_suitable_project_and_task_in_projects() {
+	let line = ActivityLine::new(" | 2020-01-12T08:00:00 | 2020-01-12T08:30:00 | specific project | specific task | some description | ");
+	let task_to_be_found = TaskBuilder::new()
+	    .with_name("Some specific task".to_string())
+	    .build();
+	let project_to_be_found = ProjectWithTasksBuilder::new()
+	    .with_name("Some specific project".to_string())
+	    .with_tasks(TasksBuilder::new()
+			.with_tasks(vec![
+			    TaskBuilder::new()
+				.with_name("Some task".to_string())
+				.build(),
+			    task_to_be_found.clone()])
+			.build())
+	    .build();
+	let projects = ProjectsBuilder::new()
+	    .with_projects(vec![
+		ProjectWithTasksBuilder::new()
+		    .with_name("Urgent".to_string())
+		    .build(),
+		project_to_be_found.clone()
+	    ])
+	    .build();
+
+	let activity = line.parse(&projects);
+
+	assert_eq!(activity, Ok(Activity::from(
+	    Local.ymd(2020, 1, 12).and_hms(8, 0, 0),
+	    Local.ymd(2020, 1, 12).and_hms(8, 30, 0),
+	    Project::new(&project_to_be_found),
+	    task_to_be_found,
+	    "some description".to_string())));
     }
 }
