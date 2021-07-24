@@ -1,16 +1,7 @@
-use crate::projects::project_error::ProjectError;
-use crate::projects::task::Task;
-use crate::projects::project::Project;
 use crate::projects::projects::Projects;
 use chrono::prelude::*;
-use crate::parser::parse_error::{ParseError, ArgumentParseError, DateTimeParseError};
+use crate::parser::parse_error::{ParseError, DateTimeParseError};
 use crate::activity::parsed_activity::ParsedActivity;
-
-#[derive(Clone, Debug)]
-enum Argument {
-    DateTime(DateTime<Local>),
-    ProjectAndTask((Project, Task)),
-}
 
 struct ActivityLine {
     line: String
@@ -24,23 +15,17 @@ impl ActivityLine {
     }
     
     fn parse(&self, projects: &Projects) -> Result<ParsedActivity, ParseError> {
-	let parts = self.line.split(" | ").collect::<Vec<&str>>();
-	if parts.len() < 7 {
-	    return Err(ParseError::TooFewArguments)
-	}
+
+	let parts = Self::split(&self.line)?;
   
-	let start = Self::get_start(&parts);	
-	let end = Self::get_end(&parts);
-	let project_and_task = Self::get_project_and_task(&parts, &projects);
-	
-	let item_errors = Self::get_errors(
-	    start.clone(),
-	    end.clone(),
-	    project_and_task.clone()
+	let start = string_to_local_date(parts.get(1).unwrap());
+	let end = string_to_local_date(parts.get(2).unwrap());
+	let project_and_task = projects.get_project_with_task(
+	    &parts.get(3).unwrap(),
+	    &parts.get(4).unwrap()
 	);
-	if !item_errors.is_empty() {
-	    return Err(ParseError::ArgumentErrors(item_errors))
-	}
+	
+	ParseError::from_arguments(&start, &end, &project_and_task)?;
 	
 	Ok(ParsedActivity::from(
 	    start.unwrap(),
@@ -51,39 +36,12 @@ impl ActivityLine {
 	))
     }
 
-    fn get_errors(start: Result<DateTime<Local>, DateTimeParseError>,
-		  end: Result<DateTime<Local>, DateTimeParseError>,
-		  project_and_task: Result<(Project, Task), ProjectError>)
-		  -> Vec<ArgumentParseError> {
-	let vec = vec![
-	    start
-		.map(|start| Argument::DateTime(start))
-		.map_err(|err| ArgumentParseError::Start(err)),
-	    end
-		.map(|end| Argument::DateTime(end))
-		.map_err(|err| ArgumentParseError::End(err)),
-	    project_and_task
-		.map(|pt| Argument::ProjectAndTask(pt))
-		.map_err(|_| ArgumentParseError::ProjectAndTask)
-	];
-	vec.into_iter()
-	    .filter(|option| option.is_err())	 
-	    .map(|option| option.unwrap_err())
-	    .collect::<Vec<ArgumentParseError>>()
-    }
-    
-    fn get_start(parts: &Vec<&str>) -> Result<DateTime<Local>, DateTimeParseError> {
-	string_to_local_date(parts.get(1).unwrap())
-    }
-
-    fn get_end(parts: &Vec<&str>) -> Result<DateTime<Local>, DateTimeParseError> {
-	string_to_local_date(parts.get(2).unwrap())
-    }
-
-    fn get_project_and_task(parts: &Vec<&str>, projects: &Projects) -> Result<(Project, Task), ProjectError> {
-	let project_string = parts.get(3).unwrap().to_string();
-	let task_string = parts.get(4).unwrap().to_string();
-	projects.get_project_with_task(&project_string, &task_string)
+    fn split(line: &str) -> Result<Vec<&str>, ParseError> {
+	let parts = line.split(" | ").collect::<Vec<&str>>();
+	if parts.len() < 7 {
+	    return Err(ParseError::TooFewArguments)
+	}
+	Ok(parts)
     }
 }
 
@@ -96,6 +54,7 @@ fn string_to_local_date(string: &str) -> Result<DateTime<Local>, DateTimeParseEr
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::parser::parse_error::ArgumentParseError;
     use crate::projects::{
 	projects::ProjectsBuilder,
 	project::ProjectWithTasksBuilder,

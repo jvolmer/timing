@@ -103,3 +103,34 @@ impl Project {
 	}
     }
 }
+
+pub struct ProjectBuilder {
+    id: u32,
+    name: String,
+}
+
+impl ProjectBuilder {
+    pub fn new() -> Self {
+	Self {
+	    id: 1,
+	    name: "project".to_string(),
+	}
+    }
+    
+    pub fn with_name(mut self, name: String) -> Self {
+	self.name = name;
+	self
+    }
+
+    pub fn with_id(mut self, id: u32) -> Self {
+	self.id = id;
+	self
+    }
+    
+    pub fn build(self) -> Project {
+	Project {
+	    id: self.id,
+	    name: self.name,
+	}
+    }
+}
