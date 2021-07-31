@@ -4,18 +4,18 @@ use crate::projects::projects::Projects;
 use crate::parser::parse_error::ParseError;
 use crate::parser::time;
 
-struct ActivityLine {
+pub struct ActivityLine {
     line: String
 }
     
 impl ActivityLine {
-    fn new(line: &str) -> Self {
+    pub fn new(line: &str) -> Self {
 	ActivityLine {
 	    line: line.to_string()
 	}
     }
     
-    fn parse(&self, projects: &Projects) -> Result<Activity, ParseError> {
+    pub fn parse(&self, projects: &Projects) -> Result<Activity, ParseError> {
 	let parts = Self::split(&self.line)?;
   
 	let start = time::start(parts.get(1).unwrap());

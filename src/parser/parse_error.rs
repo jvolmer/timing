@@ -16,7 +16,11 @@ impl fmt::Display for ParseError {
 	let error_name = "ParseError";
 	match &self {
 	    Self::TooFewArguments => write!(f, "All | {}: Too few arguments given", error_name),
-	    Self::ArgumentErrors(errors) => write!(f, "{:?}", errors),
+ 	    Self::ArgumentErrors(errors) => 
+		write!(f, "{}", errors.iter()
+		       .map(ToString::to_string)
+		       .collect::<Vec<_>>()
+		       .join("\n")),
 	    Self::None => write!(f, "No errors found"),
 	}
     }
@@ -69,7 +73,7 @@ impl ParseError {
     fn map_project_and_tak(pt: &Result<(Project, Task), ProjectError>) -> Result<Argument, ArgumentParseError> {
 	pt.clone()
 	    .map(|pt| Argument::ProjectAndTask(pt))
-	    .map_err(|_| ArgumentParseError::ProjectAndTask)
+	    .map_err(|err| ArgumentParseError::ProjectAndTask(err))
     }
 }
 
@@ -77,7 +81,7 @@ impl ParseError {
 pub enum ArgumentParseError {
     Start(DateTimeParseError),
     End(DateTimeParseError),
-    ProjectAndTask
+    ProjectAndTask(ProjectError)
 }
 
 impl fmt::Display for ArgumentParseError {
@@ -85,7 +89,7 @@ impl fmt::Display for ArgumentParseError {
 	match &self {
 	    Self::Start(error) => write!(f, "Start | ParseError: {}", error),
 	    Self::End(error) => write!(f, "End | ParseError: {}", error),
-	    Self::ProjectAndTask => write!(f, "{}", self),
+	    Self::ProjectAndTask(error) => write!(f, "{}", error),
 	}
     }
 }
@@ -135,7 +139,7 @@ mod tests {
 	assert_eq!(error, Err(ParseError::ArgumentErrors(vec![
 	    ArgumentParseError::Start(DateTimeParseError::NotConvertible),
 	    ArgumentParseError::End(DateTimeParseError::NotConvertible),
-	    ArgumentParseError::ProjectAndTask,
+	    ArgumentParseError::ProjectAndTask(ProjectError::Project(SearchError::NotFound)),
 	])));
     }
 }
