@@ -5,7 +5,7 @@ pub struct LineError(usize, String);
 
 impl fmt::Display for LineError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} | {}", self.0, self.1)
+        write!(f, " | {:>3} | {:<80} | ", self.0, self.1)
     }
 }
 

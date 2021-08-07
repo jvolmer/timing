@@ -37,7 +37,10 @@ impl ActivityLine {
     }
 
     fn split(line: &str) -> Result<Vec<&str>, ParseError> {
-        let parts = line.split(" | ").collect::<Vec<&str>>();
+        let parts = line
+            .split("|")
+            .map(|part| part.trim())
+            .collect::<Vec<&str>>();
         if parts.len() < 7 {
             return Err(ParseError::TooFewArguments);
         }
@@ -122,7 +125,7 @@ mod tests {
     #[test]
     fn it_parses_a_full_timing_line() {
         let line = ActivityLine::new(
-            " | 2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Task | Description | ",
+            " | 2020-01-12T08:00:00   |  2020-01-12T08:30:00   | Project    |  Task | Description   | ",
         );
 
         let parsed_line = line.parse(&projects());

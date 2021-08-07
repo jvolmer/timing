@@ -15,7 +15,9 @@ impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let error_name = "ParseError";
         match &self {
-            Self::TooFewArguments => write!(f, "All | {}: Too few arguments given", error_name),
+            Self::TooFewArguments => {
+                write!(f, "{:<10} | {}: Too few arguments given", "All", error_name)
+            }
             Self::ArgumentErrors(errors) => write!(
                 f,
                 "{}",
@@ -105,8 +107,8 @@ pub enum ArgumentParseError {
 impl fmt::Display for ArgumentParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self {
-            Self::Start(error) => write!(f, "Start | ParseError: {}", error),
-            Self::End(error) => write!(f, "End | ParseError: {}", error),
+            Self::Start(error) => write!(f, "{:<10} | ParseError: {}", "Start", error),
+            Self::End(error) => write!(f, "{:<10} | ParseError: {}", "End", error),
             Self::ProjectAndTask(error) => write!(f, "{}", error),
         }
     }

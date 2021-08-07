@@ -9,8 +9,8 @@ pub enum ProjectError {
 impl fmt::Display for ProjectError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self {
-            Self::Project(error) => write!(f, "Project | ProjectError: {}", error),
-            Self::Task(error) => write!(f, "Task | ProjectError: {}", error),
+            Self::Project(error) => write!(f, "{:<10} | ProjectError: {}", "Project", error),
+            Self::Task(error) => write!(f, "{:<10} | ProjectError: {}", "Task", error),
         }
     }
 }

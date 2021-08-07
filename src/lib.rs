@@ -15,10 +15,11 @@ mod projects;
 pub fn validate(text: String) -> String {
     let (_activities, errors): (Vec<_>, Vec<_>) = text
         .lines()
-        .map(|line| ActivityLine::new(line))
-        .map(|activity_line| activity_line.parse(&projects()))
         .enumerate()
-        .map(|(i, activity)| activity.map_err(|e| e.at_line(i)))
+        .filter(|(_no, line)| line.to_string() != "".to_string())
+        .map(|(no, line)| (no, ActivityLine::new(line)))
+        .map(|(no, activity_line)| (no, activity_line.parse(&projects())))
+        .map(|(no, activity)| activity.map_err(|e| e.at_line(no)))
         .partition(Result::is_ok);
     errors
         .into_iter()
@@ -54,25 +55,27 @@ mod tests {
 
     #[test]
     fn it_gives_errors_for_all_lines() {
-        let lines = r#" | A2020-01-12T08:00:00 | B2020-01-12T08:30:00 | Bla | Bla | Description | 
- | 2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Task | Description | 
- | A2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Bla | Description | 
+        let lines = r#"
+ | A2020-01-12T08:00:00 | B2020-01-12T08:30:00 | Bla     | Bla  | Description | 
+
+ | 2020-01-12T08:00:00  | 2020-01-12T08:30:00  | Project | Task | Description | 
+
+
+ | A2020-01-12T08:00:00 | 2020-01-12T08:30:00  | Project | Bla  | Description | 
 "#
         .to_string();
 
         let errors = validate(lines);
 
-        println!("{}", errors);
-        let expected_line_starts = vec![
-            "0  Start ",
-            "0  End ",
-            "0  Project ",
-            "2  Start ",
-            "2  Task ",
-        ];
+        let expected_line_starts = vec!["1Start", "1End", "1Project", "6Start", "6Task"];
         let line_starts = errors
-            .split("\n")
-            .map(|line| line.split("|").take(2).collect::<String>())
+            .lines()
+            .map(|line| {
+                line.split("|")
+                    .map(|part| part.trim())
+                    .take(3)
+                    .collect::<String>()
+            })
             .collect::<Vec<_>>();
         assert_eq!(line_starts, expected_line_starts);
     }

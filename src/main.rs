@@ -1,12 +1,12 @@
 use std::{env, process};
 
 fn main() {
-    let filename = filename(env::args()).unwrap_or_else(|_| {
+    let filename = filename(env::args()).unwrap_or_else(|_err| {
         eprintln!("I need an input file");
         process::exit(1);
     });
 
-    let lines = std::fs::read_to_string(filename).unwrap_or_else(|err| {
+    let lines = std::fs::read_to_string(filename).unwrap_or_else(|_err| {
         eprintln!("Cannot read file");
         process::exit(1);
     });
