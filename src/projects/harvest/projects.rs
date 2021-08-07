@@ -1,7 +1,7 @@
 use crate::projects::harvest::project::HarvestProject;
-use crate::projects::projects::{Projects, ProjectsBuilder};
 use crate::projects::project::ProjectWithTasks;
-use serde::{Deserialize};
+use crate::projects::projects::{Projects, ProjectsBuilder};
+use serde::Deserialize;
 use serde_json::Result;
 
 #[derive(Deserialize, Debug, PartialEq)]
@@ -11,55 +11,53 @@ pub struct HarvestProjectAssignments {
 
 impl HarvestProjectAssignments {
     pub fn from(string: &str) -> Result<HarvestProjectAssignments> {
-	serde_json::from_str(string)
+        serde_json::from_str(string)
     }
-	
+
     pub fn to_projects(self) -> Projects {
-	let projects: Vec<ProjectWithTasks> = self.project_assignments
-	    .into_iter()
-	    .map(|harvest_project| harvest_project.to_project())
-	    .collect();
-	
-	ProjectsBuilder::new()
-	    .with_projects(projects)
-	    .build()
+        let projects: Vec<ProjectWithTasks> = self
+            .project_assignments
+            .into_iter()
+            .map(|harvest_project| harvest_project.to_project())
+            .collect();
+
+        ProjectsBuilder::new().with_projects(projects).build()
     }
 }
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::projects::project::ProjectWithTasksBuilder;
-    use crate::projects::tasks::TasksBuilder;
     use crate::projects::task::TaskBuilder;
-    
+    use crate::projects::tasks::TasksBuilder;
+
     #[test]
     fn if_parses_json_into_project_list() {
-    	let json = HARVEST_PROJECTS;
-	
-    	let harvest_projects = HarvestProjectAssignments::from(json).unwrap();
-    	let projects = harvest_projects.to_projects();
+        let json = HARVEST_PROJECTS;
 
-    	assert_eq!(
-    	    projects,
-	    ProjectsBuilder::new()
-		.with_projects(vec![
-		    ProjectWithTasksBuilder::new()
-			.with_id(95783638)
-			.with_name("Buddy".to_string())
-			.with_tasks(TasksBuilder::new()
-				    .with_tasks(vec![
-					TaskBuilder::new()
-					    .with_id(42180014)
-					    .with_name("Buddy (name buddy)".to_string())
-					    .build()])
-				    .build())
-			.build()])
-		.build()
-    	);
+        let harvest_projects = HarvestProjectAssignments::from(json).unwrap();
+        let projects = harvest_projects.to_projects();
+
+        assert_eq!(
+            projects,
+            ProjectsBuilder::new()
+                .with_projects(vec![ProjectWithTasksBuilder::new()
+                    .with_id(95783638)
+                    .with_name("Buddy".to_string())
+                    .with_tasks(
+                        TasksBuilder::new()
+                            .with_tasks(vec![TaskBuilder::new()
+                                .with_id(42180014)
+                                .with_name("Buddy (name buddy)".to_string())
+                                .build()])
+                            .build()
+                    )
+                    .build()])
+                .build()
+        );
     }
-    	
+
     const HARVEST_PROJECTS: &str = r#"
 {
   "project_assignments": [

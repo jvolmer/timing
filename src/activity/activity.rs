@@ -1,17 +1,16 @@
-use crate::activity::time::{Start, End};
+use crate::activity::time::{End, Start};
 use crate::projects::{project::Project, task::Task};
 
 #[derive(Debug, PartialEq)]
 pub struct Description {
-    text: String
+    text: String,
 }
 
 impl Description {
     pub fn new(text: String) -> Self {
-	Self { text }
+        Self { text }
     }
 }
-
 
 #[derive(Debug, PartialEq)]
 pub struct Activity {
@@ -19,17 +18,23 @@ pub struct Activity {
     end: End,
     project: Project,
     task: Task,
-    description: Description
+    description: Description,
 }
 
 impl Activity {
     pub fn from(
-	start: Start,
-	end: End,
-	project: Project,
-	task: Task,
-	description: Description
+        start: Start,
+        end: End,
+        project: Project,
+        task: Task,
+        description: Description,
     ) -> Self {
-	Self { start, end, project, task, description }
+        Self {
+            start,
+            end,
+            project,
+            task,
+            description,
+        }
     }
 }
