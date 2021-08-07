@@ -1,24 +1,26 @@
 use std::{env, process};
+use timing::Config;
 
 fn main() {
-    let filename = filename(env::args()).unwrap_or_else(|_err| {
-        eprintln!("I need an input file");
+    let config = Config::new(env::args()).unwrap_or_else(|err| {
+        eprintln!("Problem parsing arguments: {}", err);
         process::exit(1);
     });
 
-    let lines = std::fs::read_to_string(filename).unwrap_or_else(|_err| {
-        eprintln!("Cannot read file");
+    let timings = std::fs::read_to_string(&config.timing_file).unwrap_or_else(|err| {
+        eprintln!("Timings: {}", err);
         process::exit(1);
     });
 
-    println!("{}", timing::validate(lines));
-}
+    let projects_string = std::fs::read_to_string(&config.projects_file).unwrap_or_else(|err| {
+        eprintln!("Projects: {}", err);
+        process::exit(1);
+    });
 
-fn filename(mut args: env::Args) -> Result<String, &'static str> {
-    args.next();
+    let projects = timing::parse_projects(&projects_string).unwrap_or_else(|err| {
+        eprintln!("Problem parsing projects file: {}", err);
+        process::exit(1);
+    });
 
-    match args.next() {
-        Some(arg) => Ok(arg),
-        None => return Err("Didn't get a file name"),
-    }
+    println!("{}", timing::validate(&timings, &projects));
 }
