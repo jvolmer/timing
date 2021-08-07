@@ -69,22 +69,22 @@ impl ParseError {
     ) -> Result<Argument, ArgumentParseError> {
         start
             .clone()
-            .map(|start| Argument::Start(start))
-            .map_err(|err| ArgumentParseError::Start(err))
+            .map(Argument::Start)
+            .map_err(ArgumentParseError::Start)
     }
 
     fn map_end(end: &Result<End, DateTimeParseError>) -> Result<Argument, ArgumentParseError> {
         end.clone()
-            .map(|end| Argument::End(end))
-            .map_err(|err| ArgumentParseError::End(err))
+            .map(Argument::End)
+            .map_err(ArgumentParseError::End)
     }
 
     fn map_project_and_tak(
         pt: &Result<(Project, Task), ProjectError>,
     ) -> Result<Argument, ArgumentParseError> {
         pt.clone()
-            .map(|pt| Argument::ProjectAndTask(pt))
-            .map_err(|err| ArgumentParseError::ProjectAndTask(err))
+            .map(Argument::ProjectAndTask)
+            .map_err(ArgumentParseError::ProjectAndTask)
     }
 }
 

@@ -13,20 +13,19 @@ mod parser;
 mod projects;
 
 pub fn validate(lines: std::slice::Iter<String>) -> String {
-    let (activities, errors): (Vec<_>, Vec<_>) = lines
+    let (_activities, errors): (Vec<_>, Vec<_>) = lines
         .map(|line| ActivityLine::new(line))
         .map(|activity_line| activity_line.parse(&projects()))
         .enumerate()
         .map(|(i, activity)| activity.map_err(|e| e.at_line(i)))
         .partition(Result::is_ok);
-    let res = errors
+    errors
         .into_iter()
         .map(Result::unwrap_err)
         .flatten()
         .map(|error| error.to_string())
         .collect::<Vec<_>>()
-        .join("\n");
-    res
+        .join("\n")
 }
 
 fn task() -> Task {

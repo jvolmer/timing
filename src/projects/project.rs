@@ -19,9 +19,7 @@ impl Named for ProjectWithTasks {
 
 impl ProjectWithTasks {
     pub fn find_task(&self, search_string: &str) -> Result<&Task, ProjectError> {
-        self.tasks
-            .find(search_string)
-            .map_err(|err| ProjectError::Task(err))
+        self.tasks.find(search_string).map_err(ProjectError::Task)
     }
 }
 
@@ -97,7 +95,7 @@ pub struct Project {
 impl Project {
     pub fn new(project_with_tasks: &ProjectWithTasks) -> Self {
         Self {
-            id: project_with_tasks.id.clone(),
+            id: project_with_tasks.id,
             name: project_with_tasks.name.clone(),
         }
     }

@@ -21,7 +21,7 @@ impl ActivityLine {
         let start = time::start(parts.get(1).unwrap());
         let end = time::end(parts.get(2).unwrap());
         let project_and_task =
-            projects.get_project_with_task(&parts.get(3).unwrap(), &parts.get(4).unwrap());
+            projects.get_project_with_task(parts.get(3).unwrap(), parts.get(4).unwrap());
         let description = Description::new(parts.get(5).unwrap().to_string());
 
         ParseError::from_arguments(&start, &end, &project_and_task)?;
