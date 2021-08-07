@@ -1,3 +1,4 @@
+use crate::LineError;
 use crate::activity::time::{Start, End};
 use crate::projects::project_error::ProjectError;
 use crate::projects::task::Task;
@@ -8,7 +9,6 @@ use std::fmt;
 pub enum ParseError {
     TooFewArguments,
     ArgumentErrors(Vec<ArgumentParseError>),
-    None,
 }
 
 impl fmt::Display for ParseError {
@@ -21,16 +21,8 @@ impl fmt::Display for ParseError {
 		       .map(ToString::to_string)
 		       .collect::<Vec<_>>()
 		       .join("\n")),
-	    Self::None => write!(f, "No errors found"),
 	}
     }
-}
-
-#[derive(Clone, Debug)]
-enum Argument {
-    Start(Start),
-    End(End),
-    ProjectAndTask((Project, Task)),
 }
 
 impl ParseError {
@@ -58,6 +50,15 @@ impl ParseError {
 	Ok(())
     }
 
+    pub fn at_line(self, line_number: usize) -> Vec<LineError> {
+	match &self {
+	    Self::TooFewArguments => vec![LineError::new(line_number, self.to_string())],
+	    Self::ArgumentErrors(errors) => errors.iter()
+		       .map(|e| LineError::new(line_number, e.to_string()))
+		       .collect::<Vec<_>>()
+	}
+    }
+    
     fn map_start(start: &Result<Start, DateTimeParseError>) -> Result<Argument, ArgumentParseError> {
 	start.clone()
 	    .map(|start| Argument::Start(start))
@@ -75,6 +76,13 @@ impl ParseError {
 	    .map(|pt| Argument::ProjectAndTask(pt))
 	    .map_err(|err| ArgumentParseError::ProjectAndTask(err))
     }
+}
+
+#[derive(Clone, Debug)]
+enum Argument {
+    Start(Start),
+    End(End),
+    ProjectAndTask((Project, Task)),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -108,6 +116,7 @@ impl fmt::Display for DateTimeParseError {
 
 #[cfg(test)]
 mod tests {
+    use crate::LineError;
     use super::*;
     use chrono::prelude::*;
     use crate::projects::project::ProjectBuilder;
@@ -141,5 +150,35 @@ mod tests {
 	    ArgumentParseError::End(DateTimeParseError::NotConvertible),
 	    ArgumentParseError::ProjectAndTask(ProjectError::Project(SearchError::NotFound)),
 	])));
+    }
+
+    mod it_resolves_to_vector_of_line_errors {
+	use super::*;
+
+	#[test]
+	fn for_argument_errors() {
+	    let error = ParseError::ArgumentErrors(vec![
+		ArgumentParseError::Start(DateTimeParseError::NotConvertible),
+		ArgumentParseError::End(DateTimeParseError::NotConvertible),
+	    ]);
+	    
+	    let line_errors = error.at_line(5);
+	    
+	    assert_eq!(line_errors, vec![
+		LineError::new(5, ArgumentParseError::Start(DateTimeParseError::NotConvertible).to_string()),
+		LineError::new(5, ArgumentParseError::End(DateTimeParseError::NotConvertible).to_string()),
+	    ]);
+	}
+
+	#[test]
+	fn for_too_few_arguments_error() {
+	    let error = ParseError::TooFewArguments;
+
+	    let line_errors = error.at_line(4);
+
+	    assert_eq!(line_errors, vec![
+		LineError::new(4, ParseError::TooFewArguments.to_string())
+	    ]);
+	}
     }
 }
