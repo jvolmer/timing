@@ -12,8 +12,9 @@ mod line_error;
 mod parser;
 mod projects;
 
-pub fn validate(lines: std::slice::Iter<String>) -> String {
-    let (_activities, errors): (Vec<_>, Vec<_>) = lines
+pub fn validate(text: String) -> String {
+    let (_activities, errors): (Vec<_>, Vec<_>) = text
+        .lines()
         .map(|line| ActivityLine::new(line))
         .map(|activity_line| activity_line.parse(&projects()))
         .enumerate()
@@ -53,16 +54,13 @@ mod tests {
 
     #[test]
     fn it_gives_errors_for_all_lines() {
-        let lines = vec![
-            " | A2020-01-12T08:00:00 | B2020-01-12T08:30:00 | Bla | Bla | Description | "
-                .to_string(),
-            " | 2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Task | Description | "
-                .to_string(),
-            " | A2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Bla | Description | "
-                .to_string(),
-        ];
+        let lines = r#" | A2020-01-12T08:00:00 | B2020-01-12T08:30:00 | Bla | Bla | Description | 
+ | 2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Task | Description | 
+ | A2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Project | Bla | Description | 
+"#
+        .to_string();
 
-        let errors = validate(lines.iter());
+        let errors = validate(lines);
 
         println!("{}", errors);
         let expected_line_starts = vec![
