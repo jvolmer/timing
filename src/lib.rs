@@ -3,12 +3,11 @@ use crate::line_error::LineError;
 use crate::parser::activity_line::ActivityLine;
 use crate::projects::harvest::projects::HarvestProjectAssignments;
 use crate::projects::projects::Projects;
-use std::env;
 
 mod activity;
 mod line_error;
 mod parser;
-mod projects;
+pub mod projects;
 
 pub fn validate(text: &str, projects: &Projects) -> String {
     let (_activities, errors) = parse(text, projects);
@@ -94,30 +93,4 @@ mod tests {
 pub fn parse_projects(text: &str) -> Result<Projects, serde_json::Error> {
     let harvest_projects = HarvestProjectAssignments::from(text)?;
     Ok(harvest_projects.to_projects())
-}
-
-pub struct Config {
-    pub timing_file: String,
-    pub projects_file: String,
-}
-
-impl Config {
-    pub fn new(mut args: env::Args) -> Result<Config, &'static str> {
-        args.next();
-
-        let timing_file = match args.next() {
-            Some(arg) => arg,
-            None => return Err("Didn't get a file name"),
-        };
-
-        let projects_file = match args.next() {
-            Some(arg) => arg,
-            None => "input/projects.json".to_string(),
-        };
-
-        Ok(Config {
-            timing_file,
-            projects_file,
-        })
-    }
 }

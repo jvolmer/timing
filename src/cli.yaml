@@ -1,0 +1,16 @@
+name: timing
+version: "0.1"
+author: Julia Volmer <juliavolmer@t-online.de>
+about: Validate your timesheet
+args:
+  - INPUT:
+      about: Org-file with timing data to be validated
+      value_name: FILE
+      required: true
+      index: 1
+  - projects:
+      about: Validate against projects from a custom json-file
+      short: p
+      long: projects
+      value_name: FILE
+      takes_value: true

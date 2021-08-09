@@ -1,26 +1,39 @@
-use std::{env, process};
-use timing::Config;
+use clap::{load_yaml, App};
+use std::process;
+use timing::projects::projects::Projects;
 
 fn main() {
-    let config = Config::new(env::args()).unwrap_or_else(|err| {
-        eprintln!("Problem parsing arguments: {}", err);
-        process::exit(1);
-    });
+    let yaml = load_yaml!("cli.yaml");
+    let matches = App::from(yaml).get_matches();
 
-    let timings = std::fs::read_to_string(&config.timing_file).unwrap_or_else(|err| {
+    println!(
+        "{}",
+        timing::validate(
+            &self::timings(matches.value_of("INPUT").unwrap()),
+            &self::projects(
+                matches
+                    .value_of("projects")
+                    .unwrap_or("input/projects.json")
+            )
+        )
+    );
+}
+
+fn timings(file: &str) -> String {
+    std::fs::read_to_string(file).unwrap_or_else(|err| {
         eprintln!("Timings: {}", err);
         process::exit(1);
-    });
+    })
+}
 
-    let projects_string = std::fs::read_to_string(&config.projects_file).unwrap_or_else(|err| {
+fn projects(file: &str) -> Projects {
+    let content = std::fs::read_to_string(file).unwrap_or_else(|err| {
         eprintln!("Projects: {}", err);
         process::exit(1);
     });
 
-    let projects = timing::parse_projects(&projects_string).unwrap_or_else(|err| {
+    timing::parse_projects(&content).unwrap_or_else(|err| {
         eprintln!("Problem parsing projects file: {}", err);
         process::exit(1);
-    });
-
-    println!("{}", timing::validate(&timings, &projects));
+    })
 }
