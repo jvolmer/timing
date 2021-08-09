@@ -1,7 +1,9 @@
-use crate::projects::harvest::task::HarvestTask;
-use crate::projects::project::{ProjectWithTasks, ProjectWithTasksBuilder};
-use crate::projects::task::Task;
-use crate::projects::tasks::TasksBuilder;
+use crate::projects_and_tasks::harvest::task::HarvestTask;
+use crate::projects_and_tasks::{
+    project::{ProjectWithTasks, ProjectWithTasksBuilder},
+    task::Task,
+    tasks::TasksBuilder,
+};
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, PartialEq)]
@@ -11,11 +13,11 @@ pub struct HarvestProject {
 }
 
 impl HarvestProject {
-    pub fn to_project(self) -> ProjectWithTasks {
+    pub fn into_project(self) -> ProjectWithTasks {
         let tasks: Vec<Task> = self
             .task_assignments
             .into_iter()
-            .map(|harvest_task| harvest_task.to_task())
+            .map(|harvest_task| harvest_task.into_task())
             .collect();
 
         ProjectWithTasksBuilder::new()
@@ -35,8 +37,8 @@ pub struct HarvestProjectIdentification {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::projects::harvest::task::{HarvestTask, HarvestTaskIdentification};
-    use crate::projects::task::TaskBuilder;
+    use crate::projects_and_tasks::harvest::task::{HarvestTask, HarvestTaskIdentification};
+    use crate::projects_and_tasks::task::TaskBuilder;
 
     #[test]
     fn it_creates_project() {
@@ -53,7 +55,7 @@ mod tests {
             }],
         };
 
-        let project = harvest_project.to_project();
+        let project = harvest_project.into_project();
 
         assert_eq!(
             project,

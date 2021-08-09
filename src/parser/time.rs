@@ -1,5 +1,5 @@
-use crate::activity::time::{End, Start};
 use crate::parser::parse_error::DateTimeParseError;
+use crate::validation::time::{End, Start};
 use chrono::prelude::*;
 
 pub fn start(string: &str) -> Result<Start, DateTimeParseError> {

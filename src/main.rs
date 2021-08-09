@@ -1,6 +1,6 @@
 use clap::{load_yaml, App};
 use std::process;
-use timing::projects::projects::Projects;
+use timing::projects_and_tasks::projects::Projects;
 
 fn main() {
     let yaml = load_yaml!("cli.yaml");

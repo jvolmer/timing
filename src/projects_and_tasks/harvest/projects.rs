@@ -1,6 +1,8 @@
-use crate::projects::harvest::project::HarvestProject;
-use crate::projects::project::ProjectWithTasks;
-use crate::projects::projects::{Projects, ProjectsBuilder};
+use crate::projects_and_tasks::harvest::project::HarvestProject;
+use crate::projects_and_tasks::{
+    project::ProjectWithTasks,
+    projects::{Projects, ProjectsBuilder},
+};
 use serde::Deserialize;
 use serde_json::Result;
 
@@ -18,7 +20,7 @@ impl HarvestProjectAssignments {
         let projects: Vec<ProjectWithTasks> = self
             .project_assignments
             .into_iter()
-            .map(|harvest_project| harvest_project.to_project())
+            .map(|harvest_project| harvest_project.into_project())
             .collect();
 
         ProjectsBuilder::new().with_projects(projects).build()
@@ -28,9 +30,9 @@ impl HarvestProjectAssignments {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::projects::project::ProjectWithTasksBuilder;
-    use crate::projects::task::TaskBuilder;
-    use crate::projects::tasks::TasksBuilder;
+    use crate::projects_and_tasks::{
+        project::ProjectWithTasksBuilder, task::TaskBuilder, tasks::TasksBuilder,
+    };
 
     #[test]
     fn if_parses_json_into_project_list() {

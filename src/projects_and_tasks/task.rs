@@ -1,4 +1,4 @@
-use crate::projects::named::Named;
+use crate::projects_and_tasks::named::Named;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Task {

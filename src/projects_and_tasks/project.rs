@@ -1,8 +1,10 @@
-use crate::projects::list_with_names::ListWithNames;
-use crate::projects::named::Named;
-use crate::projects::project_error::ProjectError;
-use crate::projects::task::Task;
-use crate::projects::tasks::{Tasks, TasksBuilder};
+use crate::projects_and_tasks::{
+    list_with_names::ListWithNames,
+    named::Named,
+    project_error::ProjectError,
+    task::Task,
+    tasks::{Tasks, TasksBuilder},
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct ProjectWithTasks {
@@ -26,7 +28,7 @@ impl ProjectWithTasks {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::projects::task::TaskBuilder;
+    use crate::projects_and_tasks::task::TaskBuilder;
 
     #[test]
     fn it_finds_task_with_specific_string() {

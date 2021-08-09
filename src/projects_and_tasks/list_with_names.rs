@@ -1,5 +1,4 @@
-use crate::projects::named::Named;
-use crate::projects::project_error::SearchError;
+use crate::projects_and_tasks::{named::Named, project_error::SearchError};
 
 pub trait ListWithNames<T: Named> {
     fn items(&self) -> std::slice::Iter<T>;

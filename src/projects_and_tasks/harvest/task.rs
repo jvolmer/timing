@@ -1,4 +1,4 @@
-use crate::projects::task::{Task, TaskBuilder};
+use crate::projects_and_tasks::task::{Task, TaskBuilder};
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, PartialEq)]
@@ -7,7 +7,7 @@ pub struct HarvestTask {
 }
 
 impl HarvestTask {
-    pub fn to_task(self) -> Task {
+    pub fn into_task(self) -> Task {
         TaskBuilder::new()
             .with_id(self.task.id)
             .with_name(self.task.name)
@@ -34,7 +34,7 @@ mod tests {
             },
         };
 
-        let task = harvest_task.to_task();
+        let task = harvest_task.into_task();
 
         assert_eq!(
             task,

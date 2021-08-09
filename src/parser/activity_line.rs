@@ -1,8 +1,6 @@
-use crate::activity::activity::Activity;
-use crate::activity::activity::Description;
-use crate::parser::parse_error::ParseError;
-use crate::parser::time;
-use crate::projects::projects::Projects;
+use crate::parser::{parse_error::ParseError, time};
+use crate::projects_and_tasks::projects::Projects;
+use crate::validation::activity::{Activity, Description};
 
 pub struct ActivityLine {
     line: String,
@@ -38,7 +36,7 @@ impl ActivityLine {
 
     fn split(line: &str) -> Result<Vec<&str>, ParseError> {
         let parts = line
-            .split("|")
+            .split('|')
             .map(|part| part.trim())
             .collect::<Vec<&str>>();
         if parts.len() < 7 {
@@ -51,14 +49,14 @@ impl ActivityLine {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::activity::time::{End, Start};
     use crate::parser::parse_error::{ArgumentParseError, DateTimeParseError};
-    use crate::projects::{
+    use crate::projects_and_tasks::{
         project::{Project, ProjectWithTasks, ProjectWithTasksBuilder},
         projects::ProjectsBuilder,
         task::{Task, TaskBuilder},
         tasks::TasksBuilder,
     };
+    use crate::validation::time::{End, Start};
     use chrono::prelude::*;
 
     fn task() -> Task {

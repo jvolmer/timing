@@ -1,5 +1,5 @@
-use crate::activity::time::{End, Start};
-use crate::projects::{project::Project, task::Task};
+use crate::projects_and_tasks::{project::Project, task::Task};
+use crate::validation::time::{End, Start};
 
 #[derive(Debug, PartialEq)]
 pub struct Description {

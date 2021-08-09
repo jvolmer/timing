@@ -1,7 +1,5 @@
-use crate::activity::time::{End, Start};
-use crate::projects::project::Project;
-use crate::projects::project_error::ProjectError;
-use crate::projects::task::Task;
+use crate::projects_and_tasks::{project::Project, project_error::ProjectError, task::Task};
+use crate::validation::time::{End, Start};
 use crate::LineError;
 use std::fmt;
 
@@ -128,9 +126,9 @@ impl fmt::Display for DateTimeParseError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::projects::project::ProjectBuilder;
-    use crate::projects::project_error::SearchError;
-    use crate::projects::task::TaskBuilder;
+    use crate::projects_and_tasks::{
+        project::ProjectBuilder, project_error::SearchError, task::TaskBuilder,
+    };
     use crate::LineError;
     use chrono::prelude::*;
 

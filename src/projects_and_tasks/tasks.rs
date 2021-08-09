@@ -1,5 +1,4 @@
-use crate::projects::list_with_names::ListWithNames;
-use crate::projects::task::Task;
+use crate::projects_and_tasks::{list_with_names::ListWithNames, task::Task};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Tasks {

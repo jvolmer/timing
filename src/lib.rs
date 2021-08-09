@@ -1,36 +1,31 @@
-use crate::activity::activity::Activity;
 use crate::line_error::LineError;
 use crate::parser::activity_line::ActivityLine;
-use crate::projects::harvest::projects::HarvestProjectAssignments;
-use crate::projects::projects::Projects;
+use crate::projects_and_tasks::{harvest::projects::HarvestProjectAssignments, projects::Projects};
+use crate::validation::activity::Activity;
 
-mod activity;
 mod line_error;
 mod parser;
-pub mod projects;
+pub mod projects_and_tasks;
+mod validation;
 
 pub fn validate(text: &str, projects: &Projects) -> String {
     let (_activities, errors) = parse(text, projects);
     combine_errors(errors)
 }
 
-fn parse(
-    text: &str,
-    projects: &Projects,
-) -> (
-    Vec<Result<Activity, Vec<LineError>>>,
-    Vec<Result<Activity, Vec<LineError>>>,
-) {
+type ActivityParseResult = Result<Activity, Vec<LineError>>;
+
+fn parse(text: &str, projects: &Projects) -> (Vec<ActivityParseResult>, Vec<ActivityParseResult>) {
     text.lines()
         .enumerate()
-        .filter(|(_no, line)| line.to_string() != "".to_string())
+        .filter(|(_no, line)| !line.is_empty())
         .map(|(no, line)| (no, ActivityLine::new(line)))
-        .map(|(no, activity_line)| (no, activity_line.parse(&projects)))
+        .map(|(no, activity_line)| (no, activity_line.parse(projects)))
         .map(|(no, activity)| activity.map_err(|e| e.at_line(no)))
         .partition(Result::is_ok)
 }
 
-fn combine_errors(errors: Vec<Result<Activity, Vec<LineError>>>) -> String {
+fn combine_errors(errors: Vec<ActivityParseResult>) -> String {
     errors
         .into_iter()
         .map(Result::unwrap_err)
@@ -43,10 +38,10 @@ fn combine_errors(errors: Vec<Result<Activity, Vec<LineError>>>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::projects::project::ProjectWithTasksBuilder;
-    use crate::projects::projects::ProjectsBuilder;
-    use crate::projects::task::TaskBuilder;
-    use crate::projects::tasks::TasksBuilder;
+    use crate::projects_and_tasks::{
+        project::ProjectWithTasksBuilder, projects::ProjectsBuilder, task::TaskBuilder,
+        tasks::TasksBuilder,
+    };
 
     fn projects() -> Projects {
         ProjectsBuilder::new()

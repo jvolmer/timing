@@ -1,7 +1,9 @@
-use crate::projects::list_with_names::ListWithNames;
-use crate::projects::project::{Project, ProjectWithTasks};
-use crate::projects::project_error::ProjectError;
-use crate::projects::task::Task;
+use crate::projects_and_tasks::{
+    list_with_names::ListWithNames,
+    project::{Project, ProjectWithTasks},
+    project_error::ProjectError,
+    task::Task,
+};
 
 #[derive(Debug, PartialEq)]
 pub struct Projects {
@@ -30,9 +32,9 @@ impl Projects {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::projects::project::ProjectWithTasksBuilder;
-    use crate::projects::task::TaskBuilder;
-    use crate::projects::tasks::TasksBuilder;
+    use crate::projects_and_tasks::{
+        project::ProjectWithTasksBuilder, task::TaskBuilder, tasks::TasksBuilder,
+    };
 
     #[test]
     fn it_finds_project_and_task() {
