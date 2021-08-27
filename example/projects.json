@@ -1,0 +1,44 @@
+{
+    "project_assignments": [
+        {
+            "project": {
+                "id": 1,
+                "name": "My Timeval project"
+            },
+            "task_assignments": [
+                {
+                    "task": {
+                        "id": 1,
+                        "name": "Build stuff"
+                    }
+                },
+                {
+                    "task": {
+                        "id": 2,
+                        "name": "Do research"
+                    }
+                },
+                {
+                    "task": {
+                        "id": 3,
+                        "name": "Planning"
+                    }
+                }
+            ]
+        },
+        {
+            "project": {
+                "id": 2,
+                "name": "Training"
+            },
+            "task_assignments": [
+                {
+                    "task": {
+                        "id": 4,
+                        "name": "Self-study"
+                    }
+                }
+            ]
+        }
+    ]
+}
