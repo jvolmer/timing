@@ -1,37 +1,151 @@
-# Timing
+# Timeval
+[![Build](https://github.com/jvolmer/timing/actions/workflows/build.yml/badge.svg)](https://github.com/jvolmer/timing/actions/workflows/build.yml)
+[![Code Coverage](https://codecov.io/gh/jvolmer/timing/branch/main/graph/badge.svg)][codecov]
 
-This project should help ease the weekly submission of timesheets.
+> Validate your timesheet
 
-## The problem
+## Background
 
-On a workday, I am required to note the tickets I work on with start and end time to a specific website. Once a week I have to submit my entries.
-Problematic is, that there is no automatic validation: I can add overlapping time entries, forget a mandatory description or even write down the wrong project. The result: Once a week I have to sit down and check all items manually - and once in a while I am still missing some errors.
+Do you want to make sure that your timesheet respects a set of given rules without scanning the timesheet manually? Then this CLI is for you: Write your timesheet in a simple text file, run the tool and get a list of errors back.
 
-## Solution
+A timesheet is a collection of time-entries. Each time-entry is a time duration where you work on a task of a project.
 
-I really want to automate this time sheet validation. The idea of this crate (additional to learning Rust) is the following:
+### Validations
 
-I write my timings in a simple text file.
+These are the planned validations:
 
-I apply this command line tool to file and it tells me all errors I make.
+- [x] Input includes correctly formatted content
+- [x] Project and Task of an entry exist
+- [ ] Entries don't overlap in time
+- [ ] Description of an entry includes a ticket number
+- [ ] Breaks are taken after specific work durations
 
-After I fixed everything, I can send the timesheet data to the timesheet website via another command.
+This is work in progress, I'll check a validation as soon as it is available.
 
-## Validations
+## Usage
 
-Validations I have in mind so far
+You need to [install rust][rust-install]. Clone this directory and execute inside:
 
-* Non-Overlapping time entries
+```shell
+cargo run <timesheet-file> --projects <projects-file>
+```
 
-* Correct project selections
+### Help
 
-* Correctly filled out description fields (including a ticket number)
+Get more information on the CLI options via
 
-* Breaks after specific working durations
+```bash
+cargo test -- --help
+```
 
-## Further ideas
+### Tests
 
-* Have an analysis of my work: how many hours in total, how many hours per project, ...
+Run all the test via 
 
-* Automatic fixes like adding breaks after appropriate durations but leave the total working time un
-touched
+```bash
+cargo test
+```
+
+Test coverage is available [here][codecov].
+
+### Example
+
+1. Write your timesheet in a textfile, where each line includes a time-entry in the format: 
+
+```org
+| <start> | <end> | <project> | <task> | <description> |
+``` 
+This is `example/timesheet.org`:
+
+```org
+| 2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Timeval  | Build      | Improve Readme file                    |
+| 2020-01-12T08:30:00 | 2020-01-12T10:30:00 | Timeval  | Build      | Create new error                       |
+| a wrong time format | 2020-01-12T12:30:00 | Training | Self-Study | Read about Readme files best practices |
+```
+
+2. Define your projecs and tasks in a json file. This is a minimal example in `example/projects.json`:
+
+```json
+{
+    "project_assignments": [
+        {
+            "project": {
+                "id": 1,
+                "name": "My Timeval project"
+            },
+            "task_assignments": [
+                {
+                    "task": {
+                        "id": 1,
+                        "name": "Build stuff"
+                    }
+                },
+                {
+                    "task": {
+                        "id": 2,
+                        "name": "Do research"
+                    }
+                },
+                {
+                    "task": {
+                        "id": 3,
+                        "name": "Planning"
+                    }
+                }
+            ]
+        },
+        {
+            "project": {
+                "id": 2,
+                "name": "Training"
+            },
+            "task_assignments": [
+                {
+                    "task": {
+                        "id": 4,
+                        "name": "Self-study"
+                    }
+                }
+            ]
+        }
+    ]
+}
+```
+
+3. Run the command
+
+```shell
+cargo run example/timesheet.org -p example/projects.json
+```
+
+This would give the output
+```shell
+|   2 | Start      | ParseError: String is not convertable to date time                  |
+```
+This output includes information about the line at which an error occured (2), the erroneous item (Start), and an error description.
+
+## Install
+
+You need to [install rust][rust-install]. Clone this repository and execute this inside:
+
+```bash
+cargo install --path .
+```
+
+This will create an executable in your ~/.cargo/bin/ directory, which should already be part of your PATH variable. Now run the CLI with 
+
+```bash
+timing --help
+```
+
+## Features
+
+- [x] Define project and task with a substring of the actual name as defined in the projects file
+- [ ] Integrate a specific timesheet API to get project information from the API and push validated time entries to the API. I plan to integrate with [Harvest](https://www.getharvest.com/?hsLang=en) - the current project file format is already based on their API.
+- [ ] Give a report: How many hours in total did you work, how many hours per project, ...
+- [ ] Choose which validations to use via command line
+- [ ] Add automatic fixes: E.g. Add breaks after appropriate durations and reschedule entries afterwards
+
+
+[codecov]: https://codecov.io/gh/jvolmer/timing
+[rust-install]: https://www.rust-lang.org/tools/install

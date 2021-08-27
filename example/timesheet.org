@@ -1,0 +1,3 @@
+| 2020-01-12T08:00:00 | 2020-01-12T08:30:00 | Timeval  | Build      | Improve Readme file                    |
+| 2020-01-12T08:30:00 | 2020-01-12T10:30:00 | Timeval  | Build      | Create new error                       |
+| a wrong time format | 2020-01-12T12:30:00 | Training | Self-Study | Read about Readme files best practices |
